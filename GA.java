@@ -55,7 +55,7 @@ public class GA
         //--------------------------------------------------------------//
         // evaluates the propulation                                    //
         //--------------------------------------------------------------//
-        evaluate();
+        evaluate(); System.out.println();
         
         boolean[][] newGenGroup=new boolean[POPULATION_SIZE][BITS];
         for (int g = 0; g < MAX_GENERATION; g++) {
@@ -80,20 +80,21 @@ public class GA
             //----------------------------------------------------------//
             // evaluates the new population                             //
             //----------------------------------------------------------//
-        	System.out.println(g+1+"th"+" GEN\n");
-        	for(int i=0;i<POPULATION_SIZE;i++)
+        	System.out.println("<GEN "+g+">");
+        	for(int i=0;i<POPULATION_SIZE;i++) {
         		System.out.println(i+1+"th :"+Arrays.toString(newGenGroup[i]));
+        	}
         	population=newGenGroup;
             evaluate(); //update fitness -> update select()
+            
+            // prints the value of the best individual
+            int bestIndex=0;
+            for(int i=1;i<POPULATION_SIZE;i++) {
+            	if(fitness[bestIndex]<fitness[i])
+            		bestIndex=i;
+            }
+            System.out.println("best fitness index: "+bestIndex+Arrays.toString(newGenGroup[bestIndex])+"\n");
         }
-        
-        // prints the value of the best individual
-        int bestIndex=0;
-        for(int i=1;i<POPULATION_SIZE;i++) {
-        	if(fitness[bestIndex]<fitness[i])
-        		bestIndex=i;
-        }
-        System.out.println("best fitness index: "+bestIndex+Arrays.toString(newGenGroup[bestIndex]));
     }
     
     /**
