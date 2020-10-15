@@ -13,6 +13,8 @@ public class GA
 	private static final double operatorP=0.5;
 	/*mutation rate*/
 	private static final double mutationR=0.1;
+	/*tournament size*/
+	private static final int Tsize=10;
     /**
      * Number of bits of the individual encoding.
      */
@@ -98,40 +100,24 @@ public class GA
     }
     
     /**
-     * Retuns the index of the selected parent using a roulette wheel.
+     * Retuns the index of the selected parent using a tournament selection
      * 
-     * @return the index of the selected parent using a roulette wheel.
+     * @return the index of the selected parent using a tournament selection.
      */
     private int select() {
-        // prepares for roulette wheel selection
-        double[] roulette = new double[POPULATION_SIZE];
-        double total = 0; //total fitness
-            
-        for (int i = 0; i < POPULATION_SIZE; i++) {
-            total += fitness[i];
-        }
-            
-        double cumulative = 0.0;
-            
-        for (int i = 0; i < POPULATION_SIZE; i++) {
-            roulette[i] = cumulative + (fitness[i] / total);
-            cumulative = roulette[i];
-        }
-            
-        roulette[POPULATION_SIZE - 1] = 1.0; //float pt error
-        
-        int parent = -1;
-        double probability = random.nextDouble();
-        
-        //selects a parent individual
-        for (int i = 0; i < POPULATION_SIZE; i++) {
-            if (probability <= roulette[i]) {
-                parent = i;
-                break;
-            }
-        }
-
-        return parent; //parent index
+        int[] arena=new int[Tsize]; //contains indexes of population
+    	int start=-1;
+    	start=random.nextInt(Tsize);
+    	for(int i=0;i<Tsize;i++) 
+			arena[i]=(start++)%Tsize;
+		
+    	int winner=arena[0];
+    	for(int a:arena) {
+    		if(winner<a)
+    			winner=a;
+    	}
+    	
+    	return winner;
     }
     
     /**
