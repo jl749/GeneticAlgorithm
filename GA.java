@@ -1,5 +1,4 @@
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*; 
 
 /**
  * Simple (skeleton) GA for the OneMax problem.
@@ -18,7 +17,7 @@ public class GA
     /**
      * Number of bits of the individual encoding.
      */
-    private static final int BITS = 10;
+    private static final int BITS = 5;
     
     /**
      * The population size.
@@ -28,7 +27,7 @@ public class GA
     /**
      * The number of generations.
      */
-    private static final int MAX_GENERATION = 5;
+    private static final int MAX_GENERATION = 10;
     
     /**
      * Random number generation.
@@ -67,7 +66,13 @@ public class GA
         	boolean[][] offsprings=new boolean[2][BITS];	double whichOperator;
         	boolean[] offspring=new boolean[BITS];
         	
-        	for(int i=0;i<POPULATION_SIZE;i++) {
+        	int bestIndex=0;
+            for(int i=1;i<POPULATION_SIZE;i++) {
+            	if(fitness[bestIndex]<fitness[i])
+            		bestIndex=i;
+            }
+        	newGenGroup[0]=population[bestIndex];
+        	for(int i=1;i<POPULATION_SIZE;i++) {
         		whichOperator=random.nextDouble();
         		if(operatorP<=whichOperator) {
         			offsprings=crossover(select(),select());	i+=1;
@@ -90,12 +95,11 @@ public class GA
             evaluate(); //update fitness -> update select()
             
             // prints the value of the best individual
-            int bestIndex=0;
             for(int i=1;i<POPULATION_SIZE;i++) {
             	if(fitness[bestIndex]<fitness[i])
             		bestIndex=i;
             }
-            System.out.println("best fitness index: "+bestIndex+Arrays.toString(newGenGroup[bestIndex])+"\n");
+            System.out.println("best fitness index: "+bestIndex+Arrays.toString(newGenGroup[bestIndex])+" "+fitness[bestIndex]+"\n");
         }
     }
     
@@ -105,13 +109,13 @@ public class GA
      * @return the index of the selected parent using a tournament selection.
      */
     private int select() {
-        int[] arena=new int[Tsize]; //contains indexes of population
-    	int start=-1;
-    	start=random.nextInt(Tsize);
-    	for(int i=0;i<Tsize;i++) 
-			arena[i]=(start++)%Tsize;
-		
-    	int winner=arena[0];
+        Set<Integer> arena=new HashSet<Integer>();
+        
+    	while(arena.size()<Tsize) {
+    		arena.add(random.nextInt(POPULATION_SIZE));
+    	}
+    	
+    	int winner=arena.iterator().next();
     	for(int a:arena) {
     		if(winner<a)
     			winner=a;
@@ -150,33 +154,32 @@ public class GA
     }
     
     /*first=index of parentA, second=index of parentB*/
+    /*uniform crossover*/
     private boolean[][] crossover(int first, int second) {
     	boolean[][] offsprings=new boolean[2][BITS];
-    	int crossoverPT;
-    	for(int i=0;i<2;i++) {
-    		crossoverPT=random.nextInt(BITS-1)+1; //inherit at least one Chromosome from parents
-    		for(int j=0;j<BITS;j++) {
-    			if(j>=crossoverPT) {
-    				offsprings[i][j]=population[second][j];
-    				continue;
-    			}
-    			offsprings[i][j]=population[first][j];
+    	for(int j=0;j<BITS;j++) {
+    		double which=random.nextDouble();
+    		if(which>=0.5) {
+    			offsprings[0][j]=population[second][j];
+    			offsprings[1][j]=population[first][j];
+    			continue;
     		}
+    		offsprings[0][j]=population[first][j];
+    		offsprings[1][j]=population[second][j];
     	}
+    	
     	return offsprings;
     }
     
     /*parent=index of parent*/
+    /*Bit string mutation*/
     private boolean[] mutation(int parent) {
     	boolean[] offspring=population[parent];
-    	boolean mutated=false; double prob; int index=0;
-    	while(!mutated && index<BITS) {
-    		if(mutated)
-    			break;
+    	double prob; int index=0;
+    	while(index<BITS) {
     		prob=random.nextDouble();
     		if(prob<=mutationR) {
     			offspring[index]=!offspring[index];
-    			mutated=true;
     		}
     		index++;
     	}
